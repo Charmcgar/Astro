@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Astro - AI Chatbot</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-container {
+      width: 90%;
+      max-width: 700px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 30px rgba(88, 166, 255, 0.3);
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #58a6ff;
+    }
+
+    .messages {
+      flex: 1;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      padding-right: 10px;
+    }
+
+    .message {
+      margin-bottom: 10px;
+    }
+
+    .message strong {
+      color: #58a6ff;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 6px;
+      border: none;
+      background-color: #222;
+      color: white;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #58a6ff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #4b8dd6;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <h1>Astro</h1>
+    <div class="messages" id="chatLog"></div>
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Ask Astro anything..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatLog = document.getElementById('chatLog');
+    const input = document.getElementById('userInput');
+
+    // Function to append message to chat log
+    function appendMessage(sender, message) {
+      const msg = document.createElement("div");
+      msg.classList.add("message");
+      msg.innerHTML = `<strong>${sender}:</strong> ${message}`;
+      chatLog.appendChild(msg);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    // Function to send message and respond with TTS
+    function sendMessage() {
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      appendMessage("You", userText);
+      input.value = "";
+      appendMessage("Astro", "<i>Thinking...</i>");
+
+      // Simulate a response (replace with actual logic or AI API later)
+      setTimeout(() => {
+        const astroReply = `You said: ${userText}`;
+        appendMessage("Astro", astroReply);
+
+        // Speak the response using TTS
+        speakText(astroReply);
+      }, 1000);
+    }
+
+    // Function to handle Text-to-Speech (TTS)
+    function speakText(text) {
+      if (!window.speechSynthesis) {
+        console.error("Speech synthesis not supported in this browser.");
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";  // Set language (can be changed if needed)
+      utterance.rate = 1;        // Speed of speech (1 is normal)
+      utterance.pitch = 1;       // Pitch (1 is normal)
+
+      // Select voice (optional, defaults to first available)
+      const voices = speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const astroVoice = voices.find(v => v.name.includes("Google US English")) || voices[0];
+        utterance.voice = astroVoice;
+      }
+
+      speechSynthesis.speak(utterance);
+    }
+
+    // Load voices early to ensure they are available
+    speechSynthesis.onvoiceschanged = () => {
+      speechSynthesis.getVoices();
+    };
+
+    // Load and greet the user on page load
+    window.onload = () => {
+      appendMessage("Astro", "Hello! How can I help you today?");
+      speakText("Hello! How can I help you today?");
+    };
+
+    // Allow "Enter" key to send message
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
